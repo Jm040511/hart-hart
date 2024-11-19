@@ -20,6 +20,8 @@ https://jm040511.github.io/hart-hart/sunflower/index.html
 
 https://jm040511.github.io/hart-hart/light/index.html
 
+https://jm040511.github.io/hart-hart/matrix-heart/index.html
+
 https://jm040511.github.io/hart-hart/heart-responsive/index.html
 
 https://jm040511.github.io/hart-hart/exploding-heart/index.html
