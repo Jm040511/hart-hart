@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaroid</title>
+    <link href="https://fonts.googleapis.com/css?family=Poor+Story" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poor Story', cursive;
+            background: #bdffbd;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Left container (Polaroid effect) */
+        .left-container {
+            flex: 1;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .element {
+            position: absolute;
+            pointer-events: none;
+            width: 150px;
+            height: auto;
+            z-index: 100;
+            transform: scale(0) rotate(0deg);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .polaroid img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .caption {
+            font-size: 1rem;
+            text-align: center;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }
+
+        .element.appear {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+
+        /* Right container (Music Player) */
+        .right-container {
+            width: 350px;
+            height: 100vh;
+            background: transparent;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Music Player Styles */
+        .music-player {
+            width: 100%;
+            max-width: 300px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+        }
+
+        .music-player h2 {
+            text-align: center;
+        }
+
+        .music-player button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .music-player button:hover {
+            background: #0056b3;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 5px;
+            background: #ddd;
+            margin-top: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: #007bff;
+            border-radius: 5px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .volume-control {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .volume-control input {
+            width: 100%;
+        }
+
+        .text {
+            text-align: center;
+            padding: 200px;
+        }
+
+        .content-container {
+            text-align: center;
+            max-width: 300px;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #333;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            color: #b3b3b3;
+        }
+
+        .album-art {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .album-art img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 5px;
+        }
+
+        .track-info h1 {
+            font-size: 20px;
+            margin: 0;
+            color: #fff;
+        }
+
+        .track-info p {
+            font-size: 14px;
+            margin: 5px 0 20px;
+            color: #b3b3b3;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #404040;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #1DB954;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .controls button {
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: #b3b3b3;
+            cursor: pointer;
+            outline: none;
+            font-size: 20px;
+            border-radius: 4px;
+            padding: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .controls button:hover {
+            background-color: #333;
+            color: #1DB954;
+            border-color: #1DB954;
+        }
+
+        #playPauseButton {
+            background-color: #1DB954;
+            color: #fff;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+            font-size: 24px;
+        }
+
+        #playPauseButton:hover {
+            background-color: #1AAE3C;
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Container for Polaroid Effect -->
+    <div class="left-container">
+        <div class="text">
+            <h1>Hover the Mouse</h1>
+        </div>
+    </div>
+
+    <!-- Right Container for Music Player -->
+    <div class="right-container">
+        <div class="content-container">
+            <div class="player-container">
+                <div class="album-art">
+                    <img src="images/you.png" alt="Album Art">
+                </div>
+                <div class="track-info">
+                    <h1>You</h1>
+                    <p>Chase Atlantic</p>
+                </div>
+                <div class="progress-container">
+                    <span id="current-time">0:03</span>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                    <span id="duration">-2:36</span>
+                </div>
+                <div class="controls">
+                    <button onclick="shuffle()"><i class="fas fa-random"></i></button>
+                    <button onclick="rewind()"><i class="fas fa-step-backward"></i></button>
+                    <button id="playPauseButton" onclick="togglePlay()"><i id="playPauseIcon" class="fas fa-play"></i></button>
+                    <button onclick="forward()"><i class="fas fa-step-forward"></i></button>
+                    <button onclick="repeat()"><i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+        </div>
+    
+        <audio id="music" src="music/you.mp3" preload="metadata"></audio>
+    </div>
+
+    <script>
+        $(window).on('load', function () {
+            const images = [
+                "images/1.jpg",
+                "images/2.jpeg",
+                "images/3.jpeg",
+                "images/4.jpeg",
+                "images/5.jpeg",
+                "images/6.jpg",
+                "images/7.jpg",
+                "images/8.jpg"
+            ];
+            const captions = [
+                "Moments in a snap.",
+                "Instant memories.",
+                "Today, captured forever.",
+                "Magic in the moment.",
+                "Life, through the lens.",
+                "Unforgettable moments.",
+                "Time stands still.",
+                "Every photo tells a story."
+            ];
+            let currentImageIndex = 0;
+
+            function createPolaroid(e) {
+                let element = document.createElement("div");
+                element.className = "element";
+                document.querySelector(".left-container").prepend(element);
+
+                let polaroid = document.createElement("div");
+                polaroid.className = "polaroid";
+
+                let img = document.createElement("img");
+                img.src = images[currentImageIndex];
+                polaroid.appendChild(img);
+
+                let caption = document.createElement("div");
+                caption.className = "caption";
+                caption.innerText = captions[currentImageIndex];
+                polaroid.appendChild(caption);
+
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+
+                element.appendChild(polaroid);
+
+                const offsetX = Math.random() * 50 - 25;
+                const offsetY = Math.random() * 50 - 25;
+                element.style.left = e.clientX + offsetX + 'px';
+                element.style.top = e.clientY + offsetY + 'px';
+
+                setTimeout(() => element.classList.add("appear"), 50);
+
+                setTimeout(() => {
+                    element.style.opacity = 0;
+                    element.style.transform = 'scale(0.4) rotate(-10deg)';
+                    setTimeout(() => element.remove(), 1000);
+                }, 2000);
+            }
+
+            let lastMouseMoveTime = 0;
+            const delay = 200;
+
+            document.addEventListener("mousemove", (e) => {
+                const currentTime = new Date().getTime();
+                if (currentTime - lastMouseMoveTime > delay) {
+                    createPolaroid(e);
+                    lastMouseMoveTime = currentTime;
+                }
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
