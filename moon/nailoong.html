@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="img/nailoong-favicon.png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<title>Hello</title>
+<style>
+  :root{
+    --bar: #14110d;
+    --box: #e9e3d0;
+    --box-edge: #b9b092;
+    --ink: #2b2620;
+    --ink-soft: #6b6250;
+    --tag: #2f2a20;
+    --tag-text: #eee7d3;
+    --accent: #b3462f;
+    --accent-dim: #7c3423;
+    --sky-top: #201830;
+    --sky-bot: #4a3a6b;
+    --moon: #f4ecd8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family: 'Fredoka', 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, var(--sky-top), var(--sky-bot) 60%, #2b2438 60%, #14110d 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:12px;
+    overflow:hidden;
+  }
+
+  .frame{
+    position:relative;
+    width:min(96vw, 1000px);
+    aspect-ratio: 16/9;
+    background: linear-gradient(180deg, var(--sky-top), var(--sky-bot) 60%, #2b2438 60%, #14110d 100%);
+    overflow:hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    border-radius:2px;
+  }
+
+  .bar{position:absolute; left:0; right:0; height:6%; background:var(--bar); z-index:5;}
+  .bar.top{top:0;}
+  .bar.bottom{bottom:0;}
+
+  .moon-shape{
+    position:absolute;
+    top:12%; right:14%;
+    width:9%;
+    aspect-ratio:1;
+    background: radial-gradient(circle at 35% 35%, var(--moon), #cfc4a4 70%);
+    border-radius:50%;
+    box-shadow: 0 0 40px rgba(244,236,216,.35);
+    opacity:.9;
+  }
+
+  .ground{
+    position:absolute; left:0; right:0; bottom:0; height:38%;
+    background: linear-gradient(180deg, #332c46, #14110d 90%);
+  }
+
+  .character{
+    position:absolute;
+    bottom:20%;
+    left:50%;
+    transform: translateX(-50%);
+    width:34%;
+    max-width:260px;
+    filter: drop-shadow(0 14px 18px rgba(0,0,0,.55));
+    opacity:0;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .character.show{ opacity:1; }
+  .character img{
+    width:100%;
+    height:auto;
+    display:block;
+    image-rendering:-webkit-optimize-contrast;
+  }
+  .portrait-placeholder{
+    width:100%;
+    aspect-ratio:1;
+    border:2px dashed rgba(233,227,208,.55);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#eee7d3;
+    font-family:'Trebuchet MS', sans-serif;
+    font-size:clamp(10px,1.6vw,13px);
+    text-align:center;
+    padding:8%;
+    background:rgba(233,227,208,.06);
+  }
+
+  /* dialogue box */
+  .dialogue-wrap{
+    position:absolute;
+    left:6%; right:6%;
+    bottom:9%;
+    z-index:10;
+    opacity:0;
+    transform:translateY(14px);
+    pointer-events:none;
+    transition: opacity .28s ease, transform .28s ease;
+  }
+  .dialogue-wrap.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+
+  .nametag{
+    display:inline-block;
+    background:var(--tag);
+    color:var(--tag-text);
+    font-family: 'Baloo 2', 'Trebuchet MS', sans-serif;
+    font-weight:700;
+    letter-spacing:.03em;
+    font-size: clamp(12px, 1.6vw, 16px);
+    padding: 6px 16px;
+    border-radius:2px 2px 0 0;
+    position:relative;
+    left:14px;
+    box-shadow: 0 -1px 0 rgba(255,255,255,.06) inset;
+  }
+
+  .box{
+    background:var(--box);
+    border:1px solid var(--box-edge);
+    border-radius:2px;
+    padding: 18px 56px 16px 22px;
+    min-height: 78px;
+    position:relative;
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
+  }
+
+  .line{
+    font-family:'Patrick Hand', 'Trebuchet MS', sans-serif;
+font-weight:400;
+    color:var(--ink);
+    font-size: clamp(14px, 1.75vw, 18px);
+    line-height:1.5;
+    white-space:pre-wrap;
+  }
+  .line .cursor{
+    display:inline-block;
+    width:.5em;
+    animation: blink 1s steps(1) infinite;
+    opacity:.6;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  .advance-hint{
+    position:absolute;
+    right:16px;
+    bottom:10px;
+    color: var(--ink-soft);
+    font-size:16px;
+    animation: bob 1.2s ease-in-out infinite;
+    opacity:0;
+    transition: opacity .2s ease;
+  }
+  .advance-hint.show{ opacity:1; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(4px);} }
+
+  .link-btn{
+    display:inline-block;
+    margin-top:10px;
+    background:var(--accent);
+    color:#f4ece0;
+    font-family:'Trebuchet MS', sans-serif;
+    font-weight:700;
+    font-size:clamp(12px,1.5vw,14px);
+    text-decoration:none;
+    padding:8px 16px;
+    border-radius:3px;
+    transition: background .15s ease;
+  }
+  .link-btn:hover{ background:var(--accent-dim); }
+
+  /* choices */
+  .choices{
+    position:absolute;
+    left:6%; right:6%;
+    bottom:9%;
+    z-index:12;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    opacity:0;
+    transform:translateY(10px);
+    pointer-events:none;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .choices.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+
+  .choice{
+    background:var(--box);
+    border:1px solid var(--box-edge);
+    color:var(--ink);
+    font-family:'Patrick Hand', 'Trebuchet MS', sans-serif;
+font-weight:400;
+    font-size: clamp(13px, 1.5vw, 15px);
+    text-align:left;
+    padding:12px 18px;
+    cursor:pointer;
+    border-radius:2px;
+    position:relative;
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+    transition: background .15s ease, padding-left .15s ease;
+  }
+  .choice::before{
+    content:"▸";
+    color:var(--accent);
+    margin-right:8px;
+    opacity:0;
+    transition:opacity .15s ease;
+  }
+  .choice:hover{ background:#f5efdd; padding-left:24px; }
+  .choice:hover::before{ opacity:1; }
+  .choice:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .restart{
+    position:absolute;
+    top:14px; right:14px;
+    z-index:20;
+    background:rgba(20,17,13,.55);
+    color:#e9e3d0;
+    border:1px solid rgba(233,227,208,.3);
+    font-family:'Trebuchet MS', sans-serif;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:3px;
+    cursor:pointer;
+    opacity:.7;
+  }
+  .restart:hover{ opacity:1; }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 640px){
+    body{ padding:0; align-items:stretch; }
+    .frame{
+      width:100vw;
+      aspect-ratio:auto;
+      height:100vh;
+      height:100dvh;
+      border-radius:0;
+      box-shadow:none;
+    }
+    .bar{ height:28px; }
+    .character{ width:48%; bottom:24%; }
+    .dialogue-wrap, .choices{ left:4%; right:4%; bottom:8%; }
+    .box{ padding:14px 44px 14px 16px; min-height:64px; }
+    .nametag{ left:8px; font-size:13px; padding:5px 12px; }
+    .choice{ padding:11px 14px; }
+    .restart{ font-size:11px; padding:5px 8px; top:34px; right:8px; }
+    .moon-shape{ width:16%; top:14%; right:10%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+  <div class="bar top"></div>
+  <div class="moon-shape"></div>
+  <div class="ground"></div>
+
+  <button class="restart" id="restartBtn">↺ Replay</button>
+
+  <div class="character" id="charPortrait">
+    <img id="portraitImg" src="" alt="Character portrait" style="display:none;">
+    <div class="portrait-placeholder" id="portraitPlaceholder">
+      your character image here<br>(swap src on #portraitImg)
+    </div>
+  </div>
+
+  <!-- dialogue -->
+  <div class="dialogue-wrap" id="dialogueWrap">
+    <div class="nametag" id="nametag">???</div>
+    <div class="box">
+      <div class="line" id="line"></div>
+      <div class="advance-hint" id="advanceHint">▾</div>
+    </div>
+  </div>
+
+  <!-- choices -->
+  <div class="choices" id="choices"></div>
+
+  <div class="bar bottom"></div>
+</div>
+
+<script>
+(function(){
+  const PORTRAIT_1 = "img/nailoong.png";
+  const PORTRAIT_2 = "img/nailoong-2.png";
+  const PORTRAIT_3 = "img/nailoong-3.png";
+  const REVEAL_LINK = "moon.html";
+
+  const script = [
+    { id:0, speaker:"Nailoong", portrait:PORTRAIT_1, text:"Hellooo, pretty lady! I'm Nailoong! Nice to meet you!", next:1 },
+    { id:1, speaker:"Nailoong", portrait:PORTRAIT_1, text:"Ehh? You look a little sad... did something happen?", next:"choice1" },
+    { id:"choice1", choice:true, options:[
+        { label:"\"...Yeah. I'm sad.\"", next:2 },
+        { label:"\"I'm fine, really.\"", next:"reassure" }
+      ]
+    },
+    { id:"reassure", speaker:"Nailoong", portrait:PORTRAIT_2, text:"Alright... but I'm around if that changes.", next:null },
+    { id:2, speaker:"Nailoong", portrait:PORTRAIT_2, text:"Nailoong has a question! Do you like the moon... or love it lots and lots?", next:"choice2" },
+    { id:"choice2", choice:true, options:[
+        { label:"\"I love it.\"", next:3 },
+        { label:"\"I like it, I guess.\"", next:3 }
+      ]
+    },
+    { id:3, speaker:"Nailoong", portrait:PORTRAIT_3, text:"Really? Then let me show you something super special!", next:4 },
+    { id:4, speaker:"Nailoong", portrait:PORTRAIT_3, text:"Come on — follow me.", link:REVEAL_LINK, linkLabel:"See what I found →", next:null }
+  ];
+
+  const nodes = Object.fromEntries(script.map(n => [String(n.id), n]));
+
+  const dialogueWrap = document.getElementById('dialogueWrap');
+  const nametag = document.getElementById('nametag');
+  const lineEl = document.getElementById('line');
+  const advanceHint = document.getElementById('advanceHint');
+  const choicesEl = document.getElementById('choices');
+  const restartBtn = document.getElementById('restartBtn');
+  const charPortrait = document.getElementById('charPortrait');
+  const portraitImg = document.getElementById('portraitImg');
+  const portraitPlaceholder = document.getElementById('portraitPlaceholder');
+
+  let current = "0";
+  let typing = false;
+  let typeTimer = null;
+  const TYPE_SPEED = 22;
+  let linkEl = null;
+
+  function setPortrait(src){
+    if(src){
+      portraitImg.src = src;
+      portraitImg.style.display = "block";
+      portraitPlaceholder.style.display = "none";
+    } else {
+      portraitImg.style.display = "none";
+      portraitPlaceholder.style.display = "flex";
+    }
+    charPortrait.classList.add('show');
+  }
+
+  function clearLink(){
+    if(linkEl){ linkEl.remove(); linkEl = null; }
+  }
+
+  function typeLine(text, node){
+    typing = true;
+    lineEl.textContent = "";
+    let i = 0;
+    advanceHint.classList.remove('show');
+    clearLink();
+
+    clearInterval(typeTimer);
+    typeTimer = setInterval(() => {
+      i++;
+      lineEl.textContent = text.slice(0, i);
+      if(i >= text.length){
+        clearInterval(typeTimer);
+        typing = false;
+        advanceHint.classList.add('show');
+        if(node && node.link){
+          linkEl = document.createElement('a');
+          linkEl.href = node.link;
+          linkEl.target = "_blank";
+          linkEl.rel = "noopener";
+          linkEl.className = "link-btn";
+          linkEl.textContent = node.linkLabel || "Continue →";
+          lineEl.insertAdjacentElement('afterend', linkEl);
+        }
+      }
+    }, TYPE_SPEED);
+  }
+
+  function finishTypingInstantly(text, node){
+    clearInterval(typeTimer);
+    typing = false;
+    lineEl.textContent = text;
+    advanceHint.classList.add('show');
+    clearLink();
+    if(node && node.link){
+      linkEl = document.createElement('a');
+      linkEl.href = node.link;
+      linkEl.target = "_blank";
+      linkEl.rel = "noopener";
+      linkEl.className = "link-btn";
+      linkEl.textContent = node.linkLabel || "Continue →";
+      lineEl.insertAdjacentElement('afterend', linkEl);
+    }
+  }
+
+  function showChoices(options){
+    dialogueWrap.classList.remove('show');
+    choicesEl.innerHTML = "";
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.textContent = opt.label;
+      btn.addEventListener('click', () => {
+        choicesEl.classList.remove('show');
+        goTo(opt.next);
+      });
+      choicesEl.appendChild(btn);
+    });
+    requestAnimationFrame(() => choicesEl.classList.add('show'));
+  }
+
+  function goTo(id){
+    if(id === null || id === undefined){
+      dialogueWrap.classList.remove('show');
+      choicesEl.classList.remove('show');
+      return;
+    }
+    const node = nodes[String(id)];
+    if(!node) return;
+    current = String(id);
+
+    if(node.choice){
+      showChoices(node.options);
+      return;
+    }
+
+    choicesEl.classList.remove('show');
+    nametag.textContent = node.speaker;
+    setPortrait(node.portrait);
+    dialogueWrap.classList.add('show');
+    typeLine(node.text, node);
+  }
+
+  function advance(){
+    const node = nodes[current];
+    if(!node || node.choice) return;
+    if(typing){
+      finishTypingInstantly(node.text, node);
+      return;
+    }
+    goTo(node.next);
+  }
+
+  document.getElementById('frame').addEventListener('click', (e) => {
+    if(e.target.closest('.choice') || e.target.closest('.restart') || e.target.closest('.link-btn')) return;
+    advance();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.code === 'Space' || e.code === 'Enter'){
+      e.preventDefault();
+      advance();
+    }
+  });
+
+  restartBtn.addEventListener('click', () => {
+    clearInterval(typeTimer);
+    goTo("0");
+  });
+
+  goTo("0");
+})();
+</script>
+
+</body>
+</html>

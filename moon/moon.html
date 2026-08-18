@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="a quiet scroll through the moon's phases, for someone who never asks for the same care she gives.">
+<meta name="theme-color" content="#080b21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="https://www.solarsystemscope.com/textures/download/2k_moon.jpg">
+<link rel="icon" type="img/moon-favicon.png" href="favicon.png">
+<title>moon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600&display=swap');
+
+  :root {
+    --sky-deep: #080b21;
+    --sky-mid: #10143a;
+    --sky-horizon: #1b2158;
+    --moon-light: #f5f1e4;
+    --moon-crater: #d8cdaf;
+    --moon-glow: rgba(245, 241, 228, 0.35);
+    --text-soft: #e3e4f2;
+    --text-dim: #8890c4;
+    --label: #7981bd;
+    --crimson: #a83a2e;
+    --crimson-glow: rgba(214, 90, 62, 0.45);
+    --crimson-text: #e8c9be;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: linear-gradient(180deg, var(--sky-deep) 0%, var(--sky-mid) 45%, var(--sky-horizon) 100%);
+    font-family: 'Manrope', sans-serif;
+    color: var(--text-soft);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Starfield */
+  #stars, #stars2, #stars3 {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Moon stage — pinned in the sky */
+  .moon-stage {
+    position: sticky;
+    top: 0;
+    height: 46vh;
+    min-height: 260px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--sky-deep) 0%, rgba(8,11,33,0.85) 70%, rgba(8,11,33,0) 100%);
+  }
+
+  .moon-wrap {
+    position: relative;
+    width: 34vw;
+    max-width: 190px;
+    min-width: 120px;
+    aspect-ratio: 1 / 1;
+    pointer-events: auto;
+  }
+
+  .moon-glow {
+    position: absolute;
+    inset: -30%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--moon-glow) 0%, rgba(245,241,228,0) 68%);
+    transition: background 1.2s ease;
+    filter: blur(2px);
+  }
+
+  .moon {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--moon-crater);
+    background-image:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 60%),
+      url('https://www.solarsystemscope.com/textures/download/2k_moon.jpg');
+    background-repeat: no-repeat, repeat-x;
+    background-size: cover, 110% 100%;
+    animation: moonRotation 22s linear infinite;
+    box-shadow:
+      inset -10px 8px 6px -5px rgba(255,255,255,0.45),
+      inset 20px -20px 40px 30px rgba(0,0,0,0.55),
+      7px -6px 14px rgba(255,255,255,0.15),
+      0 0 40px 4px rgba(0,0,0,0.2);
+  }
+
+  @keyframes moonRotation {
+    0%   { background-position: 35% 30%, 0% 0%; }
+    100% { background-position: 35% 30%, 300% 0%; }
+  }
+
+  .moon-shadow {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: var(--sky-deep);
+    transform: translateX(-4%);
+    transition: background-color 1.4s ease;
+  }
+
+  .eclipse-tint {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--crimson);
+    opacity: 0;
+    mix-blend-mode: hard-light;
+    pointer-events: none;
+  }
+
+  /* Content column */
+  main {
+    position: relative;
+    z-index: 3;
+    margin-top: -8vh;
+  }
+
+  .hero {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: center;
+    padding: 0 1.5rem 6vh;
+  }
+
+  .hero .kicker {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin-bottom: 0.9rem;
+  }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+    line-height: 1.25;
+    color: var(--text-soft);
+    max-width: 15ch;
+  }
+
+  .scroll-hint {
+    margin-top: 2.2rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fade-pulse 2.6s ease-in-out infinite;
+  }
+
+  .scroll-hint span {
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(180deg, var(--text-dim), transparent);
+  }
+
+  @keyframes fade-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.9; }
+  }
+
+  section.panel {
+    min-height: 74vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8vh 1.6rem;
+  }
+
+  .panel-inner {
+    max-width: 460px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .panel-inner.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .phase-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--label);
+    margin-bottom: 1.1rem;
+    transition: color 1.2s ease;
+  }
+
+  .panel p {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: clamp(1.35rem, 5.2vw, 1.85rem);
+    line-height: 1.55;
+    color: var(--text-soft);
+  }
+
+  /* Phase labels warm gradually as the moon fills, panel by panel */
+  section.panel[data-phase="0"] .phase-label { color: #7981bd; }
+  section.panel[data-phase="1"] .phase-label { color: #8a86c2; }
+  section.panel[data-phase="2"] .phase-label { color: #a190bd; }
+  section.panel[data-phase="3"] .phase-label { color: #bb95ac; }
+  section.panel[data-phase="4"] .phase-label { color: #cf9a8f; }
+  section.finale .phase-label { color: var(--crimson-text); }
+  section.finale p { color: #f2e2da; }
+
+  .signature {
+    margin-top: 2.4rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--crimson-text);
+    opacity: 0;
+    transition: opacity 1.4s ease 0.3s;
+  }
+  .signature.visible { opacity: 1; }
+
+  footer {
+    text-align: center;
+    padding: 8vh 1.5rem 10vh;
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 3;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--moon-light);
+    outline-offset: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .panel-inner, .signature, .moon-shadow, .moon, .eclipse-tint { transition: none !important; }
+    .scroll-hint, .moon { animation: none; }
+  }
+
+  @supports (height: 100dvh) {
+    .moon-stage { height: 46dvh; }
+  }
+
+  /* Tonight's real moon phase, whispered under the animated one */
+  .tonight-label {
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    transform: translateX(-50%);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 1.8s ease 0.4s;
+    white-space: nowrap;
+  }
+  .tonight-label.visible { opacity: 0.75; }
+
+  /* A soft, hidden pulse when the moon itself is touched */
+  @keyframes moonPulse {
+    0%   { filter: brightness(1); }
+    35%  { filter: brightness(1.28); }
+    100% { filter: brightness(1); }
+  }
+  .moon.pulsing { animation: moonRotation 22s linear infinite, moonPulse 1.6s ease; }
+
+  .moon-whisper {
+    position: absolute;
+    left: 50%;
+    top: 108%;
+    transform: translateX(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+  .moon-whisper.visible { opacity: 0.9; }
+
+  /* Sound toggle */
+  .sound-toggle {
+    position: fixed;
+    top: max(1.1rem, env(safe-area-inset-top));
+    right: 1.1rem;
+    z-index: 20;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(227, 228, 242, 0.18);
+    background: rgba(8, 11, 33, 0.35);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: color 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+  }
+  .sound-toggle:hover { color: var(--text-soft); border-color: rgba(227, 228, 242, 0.35); }
+  .sound-toggle.on { color: var(--crimson-text); border-color: rgba(232, 201, 190, 0.4); }
+  .sound-toggle svg { width: 16px; height: 16px; }
+  .sound-toggle .wave { transition: opacity 0.3s ease; }
+  .sound-toggle:not(.on) .wave { opacity: 0.25; }
+
+  /* Progress dots */
+  .progress-dots {
+    position: fixed;
+    right: 1.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    pointer-events: none;
+  }
+  .progress-dots .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(227, 228, 242, 0.25);
+    transition: background 0.6s ease, transform 0.6s ease;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .progress-dots .dot.active {
+    background: var(--crimson-text);
+    transform: scale(1.7);
+  }
+  @media (max-width: 640px) {
+    .progress-dots { right: 0.75rem; gap: 0.5rem; }
+  }
+
+  /* Closing invitation to return */
+  .replay {
+    margin-top: 3.2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 1.6s ease 0.6s, color 0.4s ease;
+  }
+  .replay.visible { opacity: 0.8; }
+  .replay:hover { color: var(--crimson-text); }
+  .replay svg { width: 12px; height: 12px; transform: rotate(180deg); }
+
+  .footer-date {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: rgba(136, 144, 196, 0.6);
+    text-transform: none;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<button class="sound-toggle on" id="soundToggle" type="button" aria-label="Mute the night ambience" aria-pressed="true">
+  <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+    <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+    <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+    <path d="M18 6a9 9 0 0 1 0 12"/>
+  </svg>
+</button>
+
+<nav class="progress-dots" id="progressDots" aria-hidden="true">
+  <span class="dot" data-phase="0"></span>
+  <span class="dot" data-phase="1"></span>
+  <span class="dot" data-phase="2"></span>
+  <span class="dot" data-phase="3"></span>
+  <span class="dot" data-phase="4"></span>
+  <span class="dot" data-phase="5"></span>
+</nav>
+
+<div class="moon-stage" role="img" aria-label="A glowing moon that waxes from new to full, then deepens to red, as the page scrolls.">
+  <div class="moon-wrap" id="moonWrap">
+    <div class="moon-glow" id="moonGlow"></div>
+    <div class="moon" id="moon">
+      <div class="eclipse-tint" id="eclipseTint"></div>
+      <div class="moon-shadow" id="moonShadow"></div>
+    </div>
+    <div class="moon-whisper" id="moonWhisper"></div>
+  </div>
+
+</div>
+
+<main>
+  <section class="hero">
+    <div class="kicker">for the nights you don't say anything</div>
+    <h1>you don't have to open up to see this through</h1>
+    <div class="scroll-hint"><span></span>scroll</div>
+  </section>
+
+  <section class="panel" data-phase="0">
+    <div class="panel-inner">
+      <div class="phase-label">new moon</div>
+      <p>You listen to everyone. Every problem that isn't yours somehow finds its way to you, and you carry it like it's nothing.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-phase="1">
+    <div class="panel-inner">
+      <div class="phase-label">waxing crescent</div>
+      <p>But when it's your turn, you go quiet. You've never made anyone ask twice for help, yet you're always the last one anyone asks how you're doing.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-phase="2">
+    <div class="panel-inner">
+      <div class="phase-label">first quarter</div>
+      <p>This isn't going to ask you that either. You don't owe anyone your thoughts just because they're heavy to carry alone.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-phase="3">
+    <div class="panel-inner">
+      <div class="phase-label">waxing gibbous</div>
+      <p>The moon doesn't ask what's wrong. It doesn't need an explanation to keep showing up, every night, whether you say anything or not.</p>
+    </div>
+  </section>
+
+  <section class="panel" data-phase="4">
+    <div class="panel-inner">
+      <div class="phase-label">full moon</div>
+      <p>So this is just me, doing the same. Full and quiet and here, not because you told me to be, but because I see you, even on the nights you say nothing.</p>
+    </div>
+  </section>
+
+  <section class="panel finale" data-phase="5">
+    <div class="panel-inner">
+      <div class="phase-label">blood moon</div>
+      <p>Whatever kind of night you're having, I'm still looking up. You don't have to say a word.</p>
+      <div class="signature">— Janrick</div>
+      <button class="replay" id="replayBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        come back anytime
+      </button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  same sky, always
+  <span class="footer-date" id="footerDate"></span>
+</footer>
+
+<script>
+  // ---- Starfield ----
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let stars = [];
+  let shootingStar = null;
+  let lastWidth = 0;
+
+  function resizeCanvas(force) {
+    const w = window.innerWidth;
+    if (!force && w === lastWidth && stars.length) {
+      canvas.height = document.body.scrollHeight;
+      return;
+    }
+    lastWidth = w;
+    canvas.width = w;
+    canvas.height = document.body.scrollHeight;
+    generateStars();
+  }
+
+  function generateStars() {
+    const count = Math.floor((canvas.width * canvas.height) / 9000);
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.3 + 0.2,
+      baseAlpha: Math.random() * 0.6 + 0.15,
+      twinkleSpeed: Math.random() * 0.015 + 0.004,
+      phase: Math.random() * Math.PI * 2
+    }));
+  }
+
+  function maybeSpawnShootingStar() {
+    if (shootingStar || prefersReducedMotion) return;
+    if (Math.random() < 0.0012) {
+      const startX = Math.random() * canvas.width * 0.6 + canvas.width * 0.2;
+      const startY = window.scrollY + Math.random() * window.innerHeight * 0.35;
+      shootingStar = { x: startX, y: startY, vx: -4.5, vy: 2.6, life: 1 };
+    }
+  }
+
+  function drawShootingStar() {
+    if (!shootingStar) return;
+    const s = shootingStar;
+    s.x += s.vx;
+    s.y += s.vy;
+    s.life -= 0.018;
+    if (s.life <= 0) { shootingStar = null; return; }
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, s.life);
+    const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * 9, s.y - s.vy * 9);
+    grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x - s.vx * 9, s.y - s.vy * 9);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawStars(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      const alpha = prefersReducedMotion
+        ? s.baseAlpha
+        : s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.phase) * 0.25;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${Math.max(0, alpha)})`;
+      ctx.fill();
+    }
+    maybeSpawnShootingStar();
+    drawShootingStar();
+    requestAnimationFrame(drawStars);
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => resizeCanvas(false), 150);
+  });
+  resizeCanvas(true);
+  requestAnimationFrame(drawStars);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => resizeCanvas(true));
+  }
+
+  // ---- Moon phase driven by scroll (simple, reliable transform-based shadow) ----
+  const moonShadow = document.getElementById('moonShadow');
+  const eclipseTint = document.getElementById('eclipseTint');
+  const moonGlow = document.getElementById('moonGlow');
+  const panels = document.querySelectorAll('.panel');
+
+  // Scroll only ever updates the TARGET values. A separate rAF loop below
+  // eases the moon toward those targets every frame, which is what makes
+  // the motion feel like a smooth glide instead of a scroll-locked snap.
+  let targetProgress = 0;
+  let targetEclipseFrac = 0;
+  let currentProgress = 0;
+  let currentEclipseFrac = 0;
+  const SMOOTHING = 0.065; // lower = floatier/more trailing, higher = snappier
+
+  function updateMoonTargets() {
+    ticking = false;
+    const docHeight = document.body.scrollHeight - window.innerHeight;
+    const scrollFrac = docHeight > 0
+      ? Math.min(Math.max(window.scrollY / docHeight, 0), 1)
+      : 0;
+
+    const heroFrac = 0.10;
+    const finaleStart = 0.86;
+    if (scrollFrac < heroFrac) {
+      targetProgress = 0;
+    } else if (scrollFrac > finaleStart) {
+      targetProgress = 1;
+    } else {
+      targetProgress = (scrollFrac - heroFrac) / (finaleStart - heroFrac);
+    }
+
+    targetEclipseFrac = Math.min(Math.max((scrollFrac - finaleStart) / (1 - finaleStart), 0), 1);
+  }
+
+  function renderMoon() {
+    if (prefersReducedMotion) {
+      // Skip the glide entirely; jump straight to target so nothing
+      // animates continuously for people who asked for less motion.
+      currentProgress = targetProgress;
+      currentEclipseFrac = targetEclipseFrac;
+    } else {
+      currentProgress += (targetProgress - currentProgress) * SMOOTHING;
+      currentEclipseFrac += (targetEclipseFrac - currentEclipseFrac) * SMOOTHING;
+      // Snap the last tiny fraction so it settles instead of creeping forever.
+      if (Math.abs(targetProgress - currentProgress) < 0.0005) currentProgress = targetProgress;
+      if (Math.abs(targetEclipseFrac - currentEclipseFrac) < 0.0005) currentEclipseFrac = targetEclipseFrac;
+    }
+
+    const shadowX = -4 + currentProgress * 114;
+    moonShadow.style.transform = `translateX(${shadowX}%)`;
+
+    const glowOpacity = 0.25 + currentProgress * 0.75;
+    moonGlow.style.opacity = glowOpacity;
+
+    eclipseTint.style.opacity = currentEclipseFrac * 0.85;
+
+    requestAnimationFrame(renderMoon);
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateMoonTargets);
+      ticking = true;
+    }
+  });
+  updateMoonTargets();
+  requestAnimationFrame(renderMoon);
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelector('.panel-inner').classList.add('visible');
+        const sig = entry.target.querySelector('.signature');
+        if (sig) sig.classList.add('visible');
+        const replay = entry.target.querySelector('.replay');
+        if (replay) replay.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.4 });
+
+  panels.forEach(p => observer.observe(p));
+
+  const dots = document.querySelectorAll('.progress-dots .dot');
+  const dotObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const phase = entry.target.getAttribute('data-phase');
+        dots.forEach(d => d.classList.toggle('active', d.getAttribute('data-phase') === phase));
+      }
+    });
+  }, { threshold: 0.5 });
+  panels.forEach(p => dotObserver.observe(p));
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = document.querySelector(`.panel[data-phase="${dot.getAttribute('data-phase')}"]`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  const replayBtn = document.getElementById('replayBtn');
+  if (replayBtn) {
+    replayBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  function getMoonPhaseName(date) {
+    const synodicMonth = 29.530588853; // days
+    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14) / 86400000; // days since epoch
+    const daysSince = date.getTime() / 86400000 - knownNewMoon;
+    const age = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
+    const frac = age / synodicMonth;
+    const names = ['new moon', 'waxing crescent', 'first quarter', 'waxing gibbous',
+                    'full moon', 'waning gibbous', 'last quarter', 'waning crescent'];
+    const index = Math.round(frac * 8) % 8;
+    return names[index];
+  }
+
+  const tonightLabel = document.getElementById('tonightLabel');
+  if (tonightLabel) {
+    tonightLabel.textContent = `tonight's moon: ${getMoonPhaseName(new Date())}`;
+    setTimeout(() => tonightLabel.classList.add('visible'), 900);
+  }
+
+  const footerDate = document.getElementById('footerDate');
+  if (footerDate) {
+    footerDate.textContent = new Date().toLocaleDateString(undefined, {
+      month: 'long', day: 'numeric', year: 'numeric'
+    });
+  }
+
+  const moonWrap = document.getElementById('moonWrap');
+  const moonEl = document.getElementById('moon');
+  const whisper = document.getElementById('moonWhisper');
+  const whispers = ['still here.', 'no rush.', 'same sky.', "take your time.", 'i see you.'];
+  let whisperTimer;
+
+  if (moonWrap && moonEl && whisper) {
+    moonWrap.addEventListener('click', () => {
+      moonEl.classList.remove('pulsing');
+      void moonEl.offsetWidth; // restart the animation
+      moonEl.classList.add('pulsing');
+
+      whisper.textContent = whispers[Math.floor(Math.random() * whispers.length)];
+      whisper.classList.add('visible');
+      clearTimeout(whisperTimer);
+      whisperTimer = setTimeout(() => whisper.classList.remove('visible'), 2600);
+    });
+  }
+
+  const soundToggle = document.getElementById('soundToggle');
+  let audioCtx = null;
+  let ambienceNodes = null;
+  let soundOn = true;
+
+  // A layered night ambience: filtered wind-noise underneath, plus two
+  // very soft, slowly-detuning low drone tones so it feels like an actual
+  // held chord in the dark rather than plain static. Everything is kept
+  // quiet and slow-moving so it sits under the reading, not over it.
+  function startAmbience() {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0;
+    masterGain.connect(audioCtx.destination);
+
+    // --- Layer 1: soft filtered wind/air noise ---
+    const bufferSize = audioCtx.sampleRate * 2;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      last = (last + 0.02 * white) / 1.02;
+      data[i] = last * 3.2;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    noise.loop = true;
+
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 420;
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.045;
+
+    const windLfo = audioCtx.createOscillator();
+    windLfo.frequency.value = 0.06;
+    const windLfoGain = audioCtx.createGain();
+    windLfoGain.gain.value = 0.018;
+    windLfo.connect(windLfoGain);
+    windLfoGain.connect(noiseGain.gain);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+
+    // --- Layer 2: a slow, quiet low drone (a held, distant chord) ---
+    // C2 + G2 + E3, gently detuned against each other so it breathes
+    // instead of sitting perfectly static.
+    const droneFreqs = [65.41, 98.0, 164.81];
+    const droneOscs = [];
+    const droneGains = [];
+    const droneFilter = audioCtx.createBiquadFilter();
+    droneFilter.type = 'lowpass';
+    droneFilter.frequency.value = 900;
+
+    droneFreqs.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.detune.value = (Math.random() * 6 - 3);
+
+      const g = audioCtx.createGain();
+      g.gain.value = 0;
+      osc.connect(g);
+      g.connect(droneFilter);
+
+      // Each voice breathes in and out on its own slow cycle so the
+      // chord never feels locked or mechanical.
+      const breathLfo = audioCtx.createOscillator();
+      breathLfo.frequency.value = 0.03 + i * 0.011;
+      const breathGain = audioCtx.createGain();
+      const peak = i === 0 ? 0.05 : 0.022;
+      breathGain.gain.value = peak * 0.5;
+      breathLfo.connect(breathGain);
+      breathGain.connect(g.gain);
+      g.gain.value = peak * 0.5;
+
+      osc.start();
+      breathLfo.start();
+      droneOscs.push(osc, breathLfo);
+      droneGains.push(g);
+    });
+
+    droneFilter.connect(masterGain);
+
+    noise.start();
+    windLfo.start();
+    masterGain.gain.linearRampToValueAtTime(1, now + 2.2);
+
+    ambienceNodes = { noise, windLfo, masterGain, droneOscs };
+  }
+
+  function stopAmbience() {
+    if (!ambienceNodes || !audioCtx) return;
+    const { noise, windLfo, masterGain, droneOscs } = ambienceNodes;
+    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.0);
+    setTimeout(() => {
+      noise.stop();
+      windLfo.stop();
+      droneOscs.forEach(node => { try { node.stop(); } catch (e) {} });
+    }, 1100);
+    ambienceNodes = null;
+  }
+
+  function setSoundState(on) {
+    soundOn = on;
+    soundToggle.classList.toggle('on', soundOn);
+    soundToggle.setAttribute('aria-pressed', String(soundOn));
+    soundToggle.setAttribute('aria-label', soundOn ? 'Mute the night ambience' : 'Play a quiet night ambience');
+    if (soundOn) {
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (!ambienceNodes) startAmbience();
+    } else {
+      stopAmbience();
+    }
+  }
+
+  // Browsers only allow audio to start after a real user gesture — there's
+  // no way around that, even on GitHub Pages. So instead of waiting for a
+  // click on the sound button specifically, we treat her very first touch,
+  // scroll, or click anywhere on the page as that gesture and start the
+  // ambience right then, since sound-on is the default we want.
+  let ambienceUnlocked = false;
+  function unlockAmbienceOnce() {
+    if (ambienceUnlocked) return;
+    ambienceUnlocked = true;
+    if (soundOn) setSoundState(true);
+    window.removeEventListener('scroll', unlockAmbienceOnce);
+    window.removeEventListener('touchstart', unlockAmbienceOnce);
+    window.removeEventListener('click', unlockAmbienceOnce);
+    window.removeEventListener('keydown', unlockAmbienceOnce);
+  }
+
+  if (soundToggle && (window.AudioContext || window.webkitAudioContext)) {
+    window.addEventListener('scroll', unlockAmbienceOnce, { passive: true, once: true });
+    window.addEventListener('touchstart', unlockAmbienceOnce, { passive: true, once: true });
+    window.addEventListener('click', unlockAmbienceOnce, { once: true });
+    window.addEventListener('keydown', unlockAmbienceOnce, { once: true });
+
+    soundToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      ambienceUnlocked = true;
+      setSoundState(!soundOn);
+    });
+  }
+
+  if (soundToggle && !(window.AudioContext || window.webkitAudioContext)) {
+    soundToggle.style.display = 'none';
+  }
+
+  window.addEventListener('load', () => setTimeout(() => resizeCanvas(true), 200));
+</script>
+
+</body>
+</html>
