@@ -41,3 +41,5 @@ https://jm040511.github.io/hart-hart/gift%20box/index.html
 https://jm040511.github.io/hart-hart/rose/rose.html
 
 https://jm040511.github.io/hart-hart/moon/nailoong.html
+
+https://jm040511.github.io/hart-hart/lantern.html
