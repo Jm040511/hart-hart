@@ -18,14 +18,87 @@ body {
     overflow: hidden;
     padding: 4vmin;
     box-sizing: border-box;
+    position: relative;
+}
+
+/* Starfield */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(1.6px 1.6px at 10% 20%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 25% 65%, #fff, transparent 100%),
+        radial-gradient(1.8px 1.8px at 40% 10%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 55% 80%, #fff, transparent 100%),
+        radial-gradient(1.4px 1.4px at 70% 30%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 85% 55%, #fff, transparent 100%),
+        radial-gradient(1.6px 1.6px at 92% 15%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 15% 85%, #fff, transparent 100%),
+        radial-gradient(1.3px 1.3px at 48% 45%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 78% 90%, #fff, transparent 100%),
+        radial-gradient(1.2px 1.2px at 5% 45%, #fff, transparent 100%),
+        radial-gradient(1px 1px at 62% 8%, #fff, transparent 100%);
+    opacity: 0.6;
+    animation: twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.45; }
+}
+
+/* Vignette, drawn on top of everything */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.65) 100%);
+}
+
+.fireflies {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.firefly {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffe9a8;
+    box-shadow: 0 0 6px 2px rgba(255, 220, 140, 0.9);
+    opacity: 0;
+    animation-name: firefly-drift;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes firefly-drift {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    10%  { opacity: 0.9; }
+    25%  { transform: translate(var(--dx1), var(--dy1)); }
+    50%  { transform: translate(var(--dx2), var(--dy2)); opacity: 0.55; }
+    75%  { transform: translate(var(--dx3), var(--dy3)); opacity: 0.9; }
+    90%  { opacity: 0.5; }
+    100% { transform: translate(var(--dx4), var(--dy4)); opacity: 0; }
 }
 
 .ground {
-    width: min(100vmin, 100vw - 8vmin, 100dvh - 8vmin);
+    width: min(92vmin, 92vw);
     max-width: 100%;
     aspect-ratio: 1.5;
     overflow: visible;
     position: relative;
+    z-index: 1;
     transform-origin: center center;
     transform: scale(2);
     animation: shrink 1.5s ease-in forwards 4s;
@@ -34,7 +107,7 @@ body {
 /* Tall/narrow phone screens: let width lead so the scene isn't squeezed */
 @media (max-aspect-ratio: 3/4) {
     .ground {
-        width: min(92vw, 92dvh);
+        width: min(92vw, 92vh);
     }
 }
 
@@ -43,6 +116,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    scale: var(--shape-scale, 1);
     &:first-child {
         top: 50%;
         left: 50%;
@@ -106,6 +180,21 @@ body {
     justify-items: center;
     align-content: center;
     transform-origin: bottom center;
+}
+
+.flower-shadow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70cqi;
+    height: 16cqi;
+    transform: translate(-50%, -20%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 72%);
+    opacity: 0;
+    scale: 0.4;
+    z-index: 0;
+    pointer-events: none;
 }
 
 .flower-top {
@@ -365,7 +454,12 @@ body {
 
 .animate {
     &.flower-container {
-        animation: flower-rotate 12s linear infinite;
+        animation: flower-rotate var(--rotate-duration, 12s) linear infinite;
+        animation-delay: var(--rotate-delay, 0s);
+    }
+
+    .flower-shadow {
+        animation: shadow-grow 1s ease-out forwards 2.6s;
     }
 
     .flower-circle {
@@ -514,13 +608,20 @@ body {
 
 @keyframes flower-rotate {
     0%,100% {
-        rotate: 0deg;
+        rotate: var(--shape-rotate, 0deg);
     }
     25% {
-        rotate: 5deg;
+        rotate: calc(var(--shape-rotate, 0deg) + 5deg);
     }
     75% {
-        rotate: -5deg;
+        rotate: calc(var(--shape-rotate, 0deg) - 5deg);
+    }
+}
+
+@keyframes shadow-grow {
+    100% {
+        opacity: 0.55;
+        scale: 1;
     }
 }
 
