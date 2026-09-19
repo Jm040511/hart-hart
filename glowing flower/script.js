@@ -17,7 +17,14 @@ document.querySelectorAll('.flower-container').forEach((el, i) => {
   el.style.setProperty('--light-color-1', light1);
   el.style.setProperty('--light-color-2', light2);
 
-  el.innerHTML = `<div class="flower-top">
+  // Organic variety: each flower gets its own slight size, tilt, and sway rhythm
+  el.style.setProperty('--shape-scale', (0.88 + Math.random() * 0.27).toFixed(2));
+  el.style.setProperty('--shape-rotate', `${(Math.random() * 16 - 8).toFixed(1)}deg`);
+  el.style.setProperty('--rotate-duration', `${(10 + Math.random() * 5).toFixed(1)}s`);
+  el.style.setProperty('--rotate-delay', `${(Math.random() * -6).toFixed(1)}s`);
+
+  el.innerHTML = `<div class="flower-shadow"></div>
+                  <div class="flower-top">
                   <div class="flower-petal flower-petal__1"></div>
                   <div class="flower-petal flower-petal__2"></div>
                   <div class="flower-petal flower-petal__3"></div>
@@ -76,3 +83,38 @@ document.querySelectorAll('.flower-container').forEach((el, i) => {
       }, 500);
     
     }, 3000);
+
+// Ambient fireflies drifting across the whole scene
+const fireflyLayer = document.querySelector('.fireflies');
+if (fireflyLayer) {
+  const FIREFLY_COUNT = 16;
+  for (let i = 0; i < FIREFLY_COUNT; i++) {
+    const fly = document.createElement('div');
+    fly.className = 'firefly';
+
+    const startX = Math.random() * 100;
+    const startY = 20 + Math.random() * 75; // keep mostly in the lower/middle of the sky
+    fly.style.left = `${startX}vw`;
+    fly.style.top = `${startY}vh`;
+
+    // Four randomized waypoints the drift keyframes travel through
+    const rand = (min, max) => (min + Math.random() * (max - min)).toFixed(1);
+    fly.style.setProperty('--dx1', `${rand(-12, 12)}vw`);
+    fly.style.setProperty('--dy1', `${rand(-10, 10)}vh`);
+    fly.style.setProperty('--dx2', `${rand(-15, 15)}vw`);
+    fly.style.setProperty('--dy2', `${rand(-12, 12)}vh`);
+    fly.style.setProperty('--dx3', `${rand(-12, 12)}vw`);
+    fly.style.setProperty('--dy3', `${rand(-10, 10)}vh`);
+    fly.style.setProperty('--dx4', `${rand(-8, 8)}vw`);
+    fly.style.setProperty('--dy4', `${rand(-8, 8)}vh`);
+
+    const duration = 14 + Math.random() * 14;
+    fly.style.animationDuration = `${duration.toFixed(1)}s`;
+    fly.style.animationDelay = `${(-Math.random() * duration).toFixed(1)}s`; // stagger phases immediately
+    const scale = 0.6 + Math.random() * 1;
+    fly.style.width = `${(4 * scale).toFixed(1)}px`;
+    fly.style.height = fly.style.width;
+
+    fireflyLayer.appendChild(fly);
+  }
+}
