@@ -112,13 +112,13 @@ function bellBuild(f){var m=small?.6:1,TAU=6.2832,SX=function(t){return[.55*Math
     bp=function(s,th,rf){var fl=Math.max(0,(s-.78)/.22),lo=Math.cos(5*(th+ph)),r=R0*(.14+.62*Math.sqrt(s)*(1-.18*s)+.3*fl*fl)*(1+.12*fl*lo)*rf;return T(r*Math.cos(th),-Hb*s*(1+.1*fl*lo),r*Math.sin(th))},
     cl=function(s){return mix3(mix3([.2,.06,.82],[.4,.14,1],Math.min(1,s*1.4)),[.6,.38,1],Math.pow(s,3))},
     ad=function(q,c,br,sz,t){add(q[0],q[1],q[2],c,br,sz,1+R()*2.6+bi*.2,t)},i,j,k,q,s,th,u,a;
-    for(i=0;i<2200*m;i++){s=Math.pow(R(),.85);th=R()*TAU;ad(bp(s,th,1),cl(s),.72*(.7+.3*Math.min(1,s*2)),1.3,.3+.7*s)}
-    for(k=0;k<5;k++)for(j=0;j<2;j++)for(i=0;i<70*m;i++){s=i/(70*m);th=-ph+TAU*k/5+j*3.1416/5;ad(bp(s,th,1.02),j?[.38,.18,1]:[.28,.08,.95],j?.8:1.1,1.2,s)}
-    for(k=0;k<20;k++)for(i=0;i<36*m;i++){s=i/(36*m);ad(bp(s,-ph+TAU*k/20+.157,1.01),[.34,.14,.95],.5,1,s)}
-    for(i=0;i<360*m;i++)ad(bp(1,i/(360*m)*TAU,1.03),[.68,.46,1],1.15,1.5,1);
+    for(i=0;i<11000*m;i++){s=Math.pow(R(),.85);th=R()*TAU;ad(bp(s,th,1),cl(s),.95*(.7+.3*Math.min(1,s*2)),1.5,.3+.7*s)}
+    for(k=0;k<5;k++)for(j=0;j<2;j++)for(i=0;i<200*m;i++){s=i/(200*m);th=-ph+TAU*k/5+j*3.1416/5;ad(bp(s,th,1.02),j?[.38,.18,1]:[.28,.08,.95],j?.8:1.1,1.2,s)}
+    for(k=0;k<20;k++)for(i=0;i<100*m;i++){s=i/(100*m);ad(bp(s,-ph+TAU*k/20+.157,1.01),[.34,.14,.95],.5,1,s)}
+    for(i=0;i<1000*m;i++)ad(bp(1,i/(1000*m)*TAU,1.03),[.68,.46,1],1.15,1.5,1);
     for(k=0;k<5;k++)for(j=0;j<6;j++)ad(bp(1,-ph+TAU*k/5+(R()-.5)*.12,1.06),[.85,.72,1],1.3,2.6,1);
     BLP.push(bp(.98,-ph,1));
-    for(i=0;i<900*m;i++){s=Math.pow(R(),.9);ad(bp(s,R()*TAU,.9),mix3([.38,.18,1],[.6,.4,1],s),.6,1.1,s)}
+    for(i=0;i<4600*m;i++){s=Math.pow(R(),.9);ad(bp(s,R()*TAU,.9),mix3([.38,.18,1],[.6,.4,1],s),.8,1.2,s)}
     for(i=0;i<220*m;i++)ad(bp(R()*.35,R()*TAU,.8),[.7,.55,1],.8,1.6,.2);
     for(i=0;i<260*m;i++){s=R();ad(bp(s,R()*TAU,1.04+.04*R()),[.55,.4,1],.35,.9,s)}
     for(i=0;i<40;i++)ad(bp(.2+.8*R(),R()*TAU,.5),[.35,.15,1],.06,14+R()*8,.5);
@@ -136,7 +136,7 @@ function bellBuild(f){var m=small?.6:1,TAU=6.2832,SX=function(t){return[.55*Math
     for(j=0;j<5;j++)for(i=0;i<30;i++){q=bq(i/30,j*TAU/5);add(q[0],q[1],q[2],[.45,.25,1],1.2,1.2,1+R()*2.6,i/30)}
     for(i=0;i<20;i++){uu=i/20;add(st[0]+(ox-st[0])*uu,st[1]+(oy-st[1])*uu,st[2],[.45,.9,.6],1.1,1.4,1+R()*2.6,.1)}
   })}
-
+ 
 function bzp(P,u){var a=1-u,b=a*a,c=b*a,d=u*u*u,e=3*b*u,g=3*a*u*u;return[c*P[0][0]+e*P[1][0]+g*P[2][0]+d*P[3][0],c*P[0][1]+e*P[1][1]+g*P[2][1]+d*P[3][1],c*P[0][2]+e*P[1][2]+g*P[2][2]+d*P[3][2]]}
 function stalk(a,c,b,n,col,d,t){for(var i=0;i<n;i++){var s=i/n,u=1-s;add(u*u*a[0]+2*u*s*c[0]+s*s*b[0]+(R()-.5)*.008,u*u*a[1]+2*u*s*c[1]+s*s*b[1]+(R()-.5)*.008,u*u*a[2]+2*u*s*c[2]+s*s*b[2]+(R()-.5)*.008,col,1.2,1.5,d+s*.6+R()*.3,t||.05)}}
 function leaf2(ox,oy,oz,ang,tilt,L,Wd,lobes,c0,c1,n,d){
