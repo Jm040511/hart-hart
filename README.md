@@ -1,4 +1,3 @@
-This program is exclusively for Danna Marie. Unauthorized access or use by anyone other than Danna Marie is strictly prohibited.
 
 https://jm040511.github.io/hart-hart/love-add.html
 
