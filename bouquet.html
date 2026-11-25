@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>a bouquet, written in code</title>
+<style>:root{--bg:#0c0811;color-scheme:dark}html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}canvas{display:block;width:100vw;height:100vh;height:100dvh;touch-action:manipulation}</style>
+</head><body><canvas id="c"></canvas>
+<script>
+// keys: space pause | + / - speed | r reverse | n next message | tap = pause
+// options in the address bar: ?to=someone&from=your name&msg=one custom line&intro=0
+const Q=new URLSearchParams(location.search),TO=Q.get('to')??'A',FROM=Q.get('from')??'Red Ivan Clay',
+SIG='this is what happens when i hyperfixate/get bored lmao by '+FROM+',,,',INTRO=Q.get('intro')!=='0',
+MSGS=Q.get('msg')?[Q.get('msg')]:["If I had a single flower for every time I think about you, I could walk forever in my garden.","A flower cannot blossom without sunshine, and a man cannot live without love.","roses are #ff005f, violets are #af87ff, i built this whole bouquet in code because i was so very bored,,, argh","no water, no sunlight, just a little python",""];
+let DET=+Q.get('detail')||2.5;const SPIN=.55,TILT=.3,CD=4,PIV=.22,TOP=1.06,AMB=.34,HEART='\u2665',TP=2*Math.PI;
+const DW=[244,248,251,254,255,231],AST=[54,97,103,140,183,189],RR=[52,88,125,161,197,204,211],RB=[95,132,175,181,217,224,231],RP=[130,166,172,209,215,216,223],RL=[54,97,103,140,147,183,189],RC=[88,124,160,166,203,209,216],
+SUNP=[130,172,178,214,220,227],SUNC=[52,58,94,94,130,136],GOLD=[94,136,178,214,220],SAK=[132,168,175,211,218,224,231],SAKC=[89,125,162,198,223],
+LP=[89,125,161,205,211,218,225],LW=[138,181,187,224,230,231],LC=[100,136,172,214,220],TR=[52,88,124,160,196,203],TPK=[132,168,205,211,218,225],TY=[136,178,214,220,226,229],TU=[54,91,97,134,140,183],
+GR=[22,28,28,34,35,71,77,114],CG=[22,22,23,28,29,34],PPK=[95,132,168,174,211,217,224],PLV=[97,103,140,146,183,189,225],PCR=[101,137,144,180,187,223,230,231],
+TIS=[138,175,181,218,224,225,231],TISL=[97,103,140,147,183,189,225],RIB=[52,88,124,160,197,204,217,231],HP=[89,125,161,197],CUT=[151,187,230],
+HC=[161,197,204,205,211,218],PC=[175,211,217,218,224,225],MC=[161,168,205,211,218,225,218,211,205,168];
+const SHADE='.:-=+*%@',PS='.:+*#%',CS='.:-=+*',PETCH=",'`.";
+const COL=[...Array(256)].map((_,n)=>{if(n<16)return'rgb('+[[0,0,0],[205,0,0],[0,205,0],[205,205,0],[0,0,238],[205,0,205],[0,205,205],[229,229,229],[127,127,127],[255,0,0],[0,255,0],[255,255,0],[92,92,255],[255,0,255],[0,255,255],[255,255,255]][n]+')';
+ if(n>=232){const v=8+(n-232)*10;return`rgb(${v},${v},${v})`}n-=16;const l=[0,95,135,175,215,255];return`rgb(${l[n/36|0]},${l[(n/6|0)%6]},${l[n%6]})`});
+const nrm=v=>{const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]},cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+basis=a=>{const h=Math.abs(a[1])<.9?[0,1,0]:[1,0,0],u=nrm(cross(h,a));return[u,cross(a,u)]},add=(p,d,k)=>[p[0]+d[0]*k,p[1]+d[1]*k,p[2]+d[2]*k],
+dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]),cl=(x,a=0,b=.999)=>x<a?a:x>b?b:x,md=(x,m=1)=>((x%m)+m)%m,
+easeBack=x=>{x=cl(x,0,1);return 1+2.70158*(x-1)**3+1.70158*(x-1)**2},
+rot=(v,ca,sa,ct,st)=>{const xr=v[0]*ca-v[2]*sa,zr=v[0]*sa+v[2]*ca;return[xr,v[1]*ct-zr*st,v[1]*st+zr*ct]},
+rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},
+wrap=(s,w)=>{const o=[];let l='';for(const x of s.split(' ')){if(l&&(l+' '+x).length>w){o.push(l);l=x}else l=l?l+' '+x:x}o.push(l);return o};
+const L=nrm([-.45,.6,.66]),CEN=[0,.14,0],DOME=.68,CORE=.5,Y0=-.3,Y1=.3,R0=.05,R1=.44,KC=(R1-R0)/(Y1-Y0),BY=-.06;
+const RADIAL=[1,.99,.98,1,1.04,1.1],SPEC=[[0,.5,0,.45,0,null],[.46,.5,.2,.1,18,SUNC],[.3,.62,.15,.1,13,GOLD],[.13,.56,.35,.05,5,SAKC],[.15,.5,.5,.1,6,LC],[0,.5,0,0,0,null]];
+const coneR=y=>Math.max(R0,R0+KC*(y-Y0));
+
+function tables(kind,petals){const reach=[],tone=[];for(let i=0;i<96;i++){const ph=(i+.5)/96*TP;let r=1,tn=0;
+ if(kind==0)r=.9+.1*Math.cos(5*ph);
+ else if(kind==1||kind==2){const c=Math.abs(Math.cos(petals*ph/2));r=kind==2?.34+.66*c**1.2:.52+.48*c**.7;tn=.14*(c-.5)}
+ else if(kind==3){const pa=md(ph*5/TP),dn=Math.abs(pa-.5);r=.64+.36*Math.max(0,Math.sin(Math.PI*pa))**.6;if(dn<.07)r-=.18*(1-dn/.07);tn=-.2*Math.exp(-(((pa-.5)/.09)**2))}
+ else if(kind==4){r=.28+.72*Math.abs(Math.cos(3*ph))**1.6;tn=-.22*Math.exp(-((Math.sin(3*ph)/.22)**2))}
+ reach.push(r);tone.push(tn)}return[reach,tone]}
+
+function build(K){
+ const rnd=rng(21),R=(a,b)=>a+(b-a)*rnd(),n1=n=>Math.max(3,n*K|0),pts=[];
+ const Pt=(x,y,z,n,pal,tone=0,two=true,ov=null,zb=0)=>pts.push([x,y,z,n[0],n[1],n[2],pal,tone,two,ov,zb]);
+ const wish=[];[RR,RB,RP,RL,RC,RB,RR,RP].forEach(p=>wish.push([0,p,.175]));wish.push([1,SUNP,.21],[1,SUNP,.2]);
+ [LP,LW,LP].forEach(p=>wish.push([4,p,.185]));for(let i=0;i<5;i++)wish.push([3,SAK,.135]);for(let i=0;i<4;i++)wish.push([2,DW,.125]);wish.push([2,AST,.125]);
+ [TR,TPK,TY,TU].forEach(p=>wish.push([5,p,.13]));
+ const placed=[],slots=[],shi=Math.sin(86*Math.PI/180);
+ [...wish.keys()].sort((a,b)=>wish[b][2]-wish[a][2]).forEach(i=>{const[kind,pal,r]=wish[i],slo=Math.sin((kind==5?40:12)*Math.PI/180);let f=.82,pos,d;
+  for(let a=0;a<480;a++){if(a&&a%80==0)f*=.92;const s=R(slo,shi),c=Math.sqrt(1-s*s),az=R(0,TP);d=[c*Math.cos(az),s,c*Math.sin(az)];pos=add(CEN,d,DOME*RADIAL[kind]*R(.97,1.04));
+   if(placed.every(q=>dist(pos,q[0])>=f*(r+q[1])))break}
+  placed.push([pos,r]);slots.push([kind,pal,r,pos,d])});
+ slots.sort((a,b)=>a[4][1]-b[4][1]);
+ const flowers=slots.map(([kind,pal,r,pos,d],rank)=>{const axis=nrm([d[0]+R(-.18,.18),d[1]+R(-.08,.2),d[2]+R(-.18,.18)]),[u,v]=basis(axis),[cr,base,slope,cup,pet,cpal]=SPEC[kind],[reach,tone]=tables(kind,pet);
+  return{kind,pos,axis,pal,R:r,seed:R(0,6.28),delay:.45+rank*.085+R(0,.12),u,v,cr,base,slope,cup,cpal,reach,tone}});
+ for(let i=0;i<8;i++){const a=(i+.5)/8*TP+R(-.1,.1),c=Math.cos(a),s=Math.sin(a),base=[.3*c,.27,.3*s],d=nrm([c,.3+R(-.1,.15),s]),side=[-s,0,c],n=nrm(cross(side,d)),Ll=R(.3,.4),W=.075,nu=n1(24),nv=n1(9)|1;
+  for(let ti=0;ti<nu;ti++){const t=ti/(nu-1),wid=W*Math.sin(Math.PI*t**.85)*(1+.1*Math.sin(26*t));
+   for(let wi=0;wi<nv;wi++){const w=wi/(nv-1)*2-1,rib=wi==nv>>1?.22:0;
+    Pt(base[0]+d[0]*Ll*t+side[0]*wid*w+n[0]*.03*w*w,base[1]+d[1]*Ll*t-.16*t*t+n[1]*.03*w*w,base[2]+d[2]*Ll*t+side[2]*wid*w+n[2]*.03*w*w,n,GR,rib-.28-.15*Math.abs(w))}}}
+ const rings=n1(52);
+ for(let i=0;i<rings;i++){const t=i/(rings-1),r=R0+(R1-R0)*t,cnt=Math.max(10,170*r*K|0);
+  for(let j=0;j<cnt;j++){const ph=(j+rnd()*.9)/cnt*TP,c=Math.cos(ph),s=Math.sin(ph),cuff=t>.9;let rr=r*(1+.05*(.3+.7*t)*Math.sin(7*ph+1.3*t));if(cuff)rr*=1+.08*(t-.9)/.1;
+   const y=Y0+(Y1-Y0)*t+.045*(Math.abs(Math.sin(5*ph+.3))-.55)*t**4,d=md(ph-(.7+2.1*t)+Math.PI,TP)-Math.PI;let tone=.3+.17*Math.cos(7*ph+1.3*t)-.14*(1-t),pal;
+   if(cuff){pal=PCR;tone+=.1}else if(Math.abs(d)<.55){pal=PLV;if(Math.abs(Math.abs(d)-.55)<.05)tone+=.3}else pal=PPK;
+   Pt(rr*c,y,rr*s,nrm([c,-KC,s]),pal,tone)}}
+ for(let k=0;k<7;k++){const t=.14+.11*k,r=R0+(R1-R0)*t,cnt=Math.max(5,r*17*K|0);
+  for(let j=0;j<cnt;j++){const ph=(j+.5*(k%2))/cnt*TP;if(Math.abs(md(ph-(.7+2.1*t)+Math.PI,TP)-Math.PI)<.68)continue;const c=Math.cos(ph),s=Math.sin(ph),rr=r*(1+.05*(.3+.7*t)*Math.sin(7*ph+1.3*t))*1.012;
+   Pt(rr*c,Y0+(Y1-Y0)*t,rr*s,nrm([c,-KC,s]),HP,.3,false,HEART,.03)}}
+ const collar=(ya,yb,ra,rb,nr0,kc,pal,crink,rim,phase)=>{const nr=n1(nr0),slope=(rb-ra)/(yb-ya);
+  for(let i=0;i<nr;i++){const t=i/(nr-1),r=ra+(rb-ra)*t**.8,cnt=Math.max(10,kc*r*K|0);
+   for(let j=0;j<cnt;j++){const ph=(j+rnd())/cnt*TP,c=Math.cos(ph),s=Math.sin(ph),rr=r*(1+crink*t*(Math.sin(9*ph+3*t+phase)+.5*Math.sin(23*ph+phase))),
+    y=ya+(yb-ya)*t+rim*t**3*(Math.abs(Math.sin(6.5*ph+phase))-.5),tone=.18+.22*Math.cos(9*ph+3*t+phase)+.1*Math.sin(23*ph)-.1*(1-t);
+    Pt(rr*c,y,rr*s,nrm([c,-slope*.8,s]),pal,tone)}}};
+ collar(.24,.45,.34,.66,18,120,TIS,.07,.07,.4);collar(.24,.56,.32,.5,14,100,TISL,.06,.06,2);
+ const br=coneR(BY)+.012,nb=n1(110);
+ for(let j=0;j<nb;j++){const ph=j/nb*TP,c=Math.cos(ph),s=Math.sin(ph);for(const dy of[-.016,-.005,.005,.016]){const rr=br+KC*dy;Pt(rr*c,BY+dy,rr*s,[c,-.1,s],RIB,.28+.12*Math.sin(3*ph)+(dy==.005?.12:0))}}
+ for(let i=0;i<9;i++){const a=i/9*TP+R(-.2,.2),ca=Math.cos(a),sa=Math.sin(a),sp=R(.02,.07),ey=-.56-R(0,.03),ns=n1(26);
+  for(let j=0;j<ns;j++){const t=j/(ns-1),rad=.02+(sp-.02)*t;Pt(rad*ca,Y0+.04+(ey-Y0-.04)*t,rad*sa,[ca,0,sa],GR,0)}Pt(sp*ca,ey,sp*sa,[ca,-1,sa],CUT,.2,true,'o',.01)}
+ const babies=[],sparkles=[];
+ for(let i=0;i<n1(130);i++){const a=R(0,TP),el=R(.15,1.45),rr=R(.62,.88);babies.push([rr*Math.cos(a)*Math.cos(el),CEN[1]+rr*Math.sin(el),rr*Math.sin(a)*Math.cos(el),R(0,6.28)])}
+ for(let i=0;i<40;i++){const a=R(0,TP),rr=R(.8,1.05);sparkles.push([rr*Math.cos(a),R(-.3,1),rr*Math.sin(a),R(0,6.28),R(1.5,4)])}
+ const stars=[...Array(70)].map(()=>[rnd(),rnd(),R(0,6.28),R(.6,2.2)]);
+ const EU=[22,28,29,35,65,72,107,108,114];
+ for(let i=0;i<10;i++){const az=(i+R(0,.8))/10*TP,c=Math.cos(az),s=Math.sin(az),d=nrm([c,R(.15,.7),s]),side=[-s,0,c],base=[.3*c,.27,.3*s],Ls=R(.42,.58),dr=R(.1,.22),sp=u=>[base[0]+d[0]*Ls*u,base[1]+d[1]*Ls*u-dr*u*u,base[2]+d[2]*Ls*u];
+  for(let j=0,m=n1(14);j<m;j++){const p=sp(j/(m-1));Pt(p[0],p[1],p[2],[c,.3,s],EU,-.2)}
+  for(let k=0;k<6;k++){const u=.28+.12*k,p=sp(u),p2=sp(Math.min(1,u+.05)),tg=nrm([p2[0]-p[0],p2[1]-p[1],p2[2]-p[2]]);
+   for(const sg of[-1,1]){const e=nrm([tg[0]+side[0]*sg*.9,tg[1],tg[2]+side[2]*sg*.9]),f=nrm(cross(e,[0,1,0])),q=add(p,e,.03),ln=.062-.012*k/5,wd=.034,nn=nrm(cross(e,f)),tn=R(-.08,.08);
+    for(let a=-.7;a<=.55;a+=.22/K){const hw=.5*Math.sqrt(Math.max(0,1-((a+.1)/.65)**2));for(let b=-hw;b<=hw+1e-6;b+=Math.max(.12,.4/K))Pt(q[0]+e[0]*a*ln+f[0]*b*wd,q[1]+e[1]*a*ln+f[1]*b*wd,q[2]+e[2]*a*ln+f[2]*b*wd,nn,EU,tn-.1+.1*a-.05*Math.abs(b))}}}}
+ const bz=coneR(BY)+.03,e2=nrm([0,1,KC]),nB=nrm([0,-KC,1]),bow=(x,y,h)=>[x,BY+y*e2[1]+nB[1]*h,bz+y*e2[2]+nB[2]*h];
+ for(const sd of[-1,1]){const dx=sd*Math.cos(.42),dy=Math.sin(.42),nu=n1(40),nv=n1(14);
+  for(let iu=0;iu<nu;iu++){const u=.06+.94*iu/(nu-1),wv=.075*Math.max(0,Math.sin(Math.PI*u**.8))**.8*Math.min(1,.35+u*1.2);
+   for(let iv=0;iv<nv;iv++){const v=iv/(nv-1)*2-1,p=bow(dx*.2*u-dy*wv*v,dy*.2*u+dx*wv*v,.01);Pt(p[0],p[1],p[2],nB,RIB,.26-.34*(1-Math.abs(v))*Math.sin(Math.PI*u)+(Math.abs(v)>.8?.1:0),true,null,.01)}}}
+ for(let i=0;i<n1(8);i++)for(let j=0;j<n1(8);j++){const p=bow((i/(n1(8)-1)*2-1)*.03,(j/(n1(8)-1)*2-1)*.026,.02);Pt(p[0],p[1],p[2],nB,RIB,.4-.08*j/n1(8),true,null,.02)}
+ const pn=pts.length,pf=new Float32Array(pn*8),pp=new Array(pn),tw=new Uint8Array(pn),ov=new Array(pn);
+ pts.forEach((p,i)=>{pf.set([p[0],p[1],p[2],p[3],p[4],p[5],p[7],p[10]],i*8);pp[i]=p[6];tw[i]=p[8]?1:0;ov[i]=p[9]});
+ return{pts:null,pf,pn,pp,tw,ov,flowers,babies,sparkles,stars,K}}
+
+const cv=document.getElementById('c'),X=cv.getContext('2d');
+let W,H,Wp,Hp,dpr,cwp,chp,cols,rows,G,cam,scene,sceneK,wc={},QF=1,BUF=null,PK=null;const tiles=new Map();
+function tile(s,k,b){const key=s.charCodeAt(0)<<9|k<<1|b;let t=tiles.get(key);if(!t){t=document.createElement('canvas');t.width=cwp;t.height=chp;const g=t.getContext('2d');if(b){g.globalAlpha=.4;g.fillStyle=COL[k];g.fillRect(0,0,cwp,chp);g.globalAlpha=1}g.font=cwp/.6+'px ui-monospace,Menlo,Consolas,monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle=COL[k];g.fillText(s,cwp/2,chp/2);tiles.set(key,t)}return t}
+function fit(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;Wp=Math.floor(W*dpr);Hp=Math.floor(H*dpr);cv.width=Wp;cv.height=Hp;
+ const fs=H/(50*DET*QF);cwp=Math.max(3,Math.round(fs*.6*dpr));chp=cwp*2;cols=Math.max(20,Wp/cwp|0);rows=Math.max(12,Hp/chp|0);tiles.clear();wc={};PK=null}
+addEventListener('resize',fit);fit();
+
+function drawCore(){const[ca,sa,ct,st,cx,cy,sx,sc]=cam,{cols,vr,z,ch,co}=G,[x,y,zc]=CEN,xr=x*ca-zc*sa,zr=x*sa+zc*ca,yt=(y-PIV)*ct-zr*st,zt=(y-PIV)*st+zr*ct,f=CD/(CD-zt),
+ fx=cx+xr*f*sx,fy=cy-yt*f*sc,rx=CORE*f*sx,ry=CORE*f*sc;
+ for(let r=Math.max(0,Math.floor(fy-ry)-1);r<Math.min(vr,Math.floor(fy+ry)+2);r++){const dy=(r+.5-fy)/ry;
+  for(let c=Math.max(0,Math.floor(fx-rx)-1);c<Math.min(cols,Math.floor(fx+rx)+2);c++){const dx=(c+.5-fx)/rx,q=dx*dx+dy*dy;if(q>=1)continue;
+   const nz=Math.sqrt(1-q),zz=zt+CORE*nz,k=r*cols+c;if(zz<=z[k])continue;const oy=-dy*CORE,oz=nz*CORE,yw=CEN[1]+oy*ct+oz*st;if(yw<.27)continue;
+   const ox=dx*CORE,zr2=-oy*st+oz*ct,xo=ox*ca+zr2*sa,zo=-ox*sa+zr2*ca,h=((((xo+4)*20|0)*73856093)^(((yw+4)*20|0)*19349663)^(((zo+4)*20|0)*83492791))&7,
+   b=cl(.3+.35*Math.max(0,dx*L[0]-dy*L[1]+nz*L[2])+(h-3.5)*.035);z[k]=zz;ch[k]=CS[b*6|0];co[k]=CG[b*CG.length|0]}}}
+
+function drawPts(list){const[ca,sa,ct,st,cx,cy,sx,sc]=cam,{cols,vr,z,ch,co}=G;
+ for(const[x,y,z0,nx,ny,nz,pal,tone,two,ov,zb]of list){const xr=x*ca-z0*sa,zr=x*sa+z0*ca,yt=(y-PIV)*ct-zr*st,zt=(y-PIV)*st+zr*ct,f=CD/(CD-zt),c=Math.floor(cx+xr*f*sx),r=Math.floor(cy-yt*f*sc);
+  if(r<0||r>=vr||c<0||c>=cols)continue;const k=r*cols+c,zq=zt+zb;if(zq<=z[k])continue;
+  const nxr=nx*ca-nz*sa,nzr=nx*sa+nz*ca,nyt=ny*ct-nzr*st,nzt=ny*st+nzr*ct;let d=nxr*L[0]+nyt*L[1]+nzt*L[2];if(two&&d<0)d=-d*.55;
+  const b=cl(AMB+.7*(d>0?d:0)+tone);z[k]=zq;ch[k]=ov||SHADE[b*8|0];co[k]=pal[b*pal.length|0]}}
+
+function drawFlat(S){const[ca,sa,ct,st,cx,cy,sx,sc]=cam,{cols,vr,z,ch,co}=G,F=S.pf,n=S.pn,PP=S.pp,TW=S.tw,OV=S.ov,l0=L[0],l1=L[1],l2=L[2];
+ for(let i=0,j=0;i<n;i++,j+=8){const x=F[j],y=F[j+1]-PIV,z0=F[j+2],zr=x*sa+z0*ca,zt=y*st+zr*ct,f=CD/(CD-zt),cf=cx+(x*ca-z0*sa)*f*sx,rf=cy-(y*ct-zr*st)*f*sc;
+  if(cf<0||rf<0)continue;const c=cf|0,r=rf|0;if(r>=vr||c>=cols)continue;const k=r*cols+c,zq=zt+F[j+7];if(zq<=z[k])continue;
+  const nx=F[j+3],ny=F[j+4],nz=F[j+5],nzr=nx*sa+nz*ca,nyt=ny*ct-nzr*st,nzt=ny*st+nzr*ct;let d=(nx*ca-nz*sa)*l0+nyt*l1+nzt*l2;if(TW[i]&&d<0)d=-d*.55;
+  const b=cl(AMB+.7*(d>0?d:0)+F[j+6]),pal=PP[i];z[k]=zq;ch[k]=OV[i]||SHADE[b*8|0];co[k]=pal[b*pal.length|0]}}
+function flower(fl,g,t){const[ca,sa,ct,st,cx,cy,sxs,sc]=cam,{cols,vr,z,ch,co}=G,[x,y,z0]=fl.pos,xr=x*ca-z0*sa,zr=x*sa+z0*ca,yt=(y-PIV)*ct-zr*st,zt=(y-PIV)*st+zr*ct,f=CD/(CD-zt),
+ fx=cx+xr*f*sxs,fy=cy-yt*f*sc,Rs=fl.R*g*1.1*(1+.03*Math.sin(t*1.6+fl.seed)),dim=-.25*(1-cl((zt+.6)/1.2,0,1)),pal=fl.pal,np=pal.length,Rx=Rs*f*sxs,Ry=Rs*f*sc,kind=fl.kind;
+ if(kind==5){const rx=Rx*.8,ry=Ry*1.35;if(ry<.5)return;
+  for(let r=Math.max(0,Math.floor(fy-ry)-1);r<Math.min(vr,Math.floor(fy+ry)+2);r++){const dy=(r+.5-fy)/ry,v=(1-dy)/2;if(v<0||v>1)continue;const hw=.62*Math.sin(Math.PI*.5*Math.min(1,v*1.5+.05));if(hw<=0)continue;
+   for(let c=Math.max(0,Math.floor(fx-rx)-1);c<Math.min(cols,Math.floor(fx+rx)+2);c++){const dx=(c+.5-fx)/rx;if(Math.abs(dx)>hw)continue;const xn=dx/hw;if(v>.72+.28*Math.cos(1.5*Math.PI*xn)**2)continue;
+    const k=r*cols+c;if(zt+.03<=z[k])continue;const seam=Math.abs(Math.abs(xn)-.33)<.12&&v>.3?-.25:0,rim=Math.abs(xn)>.84||v<.06?-.25:0,b=cl(.52-.3*xn+.1*v+seam+rim+dim);
+    z[k]=zt+.03;ch[k]=PS[b*6|0];co[k]=pal[b*np|0]}}return}
+ const[uxr,uyt,uzt]=rot(fl.u,ca,sa,ct,st),[vxr,vyt,vzt]=rot(fl.v,ca,sa,ct,st),[axr,ayt,azt]=rot(fl.axis,ca,sa,ct,st),
+ m11=uxr*Rx,m12=vxr*Rx,m21=-uyt*Ry,m22=-vyt*Ry,big=Math.max(Math.abs(m11),Math.abs(m12),Math.abs(m21),Math.abs(m22));
+ if(big<.55){const c0=Math.floor(fx),r0=Math.floor(fy);if(r0>=0&&r0<vr&&c0>=0&&c0<cols&&big>.05){const k=r0*cols+c0;if(zt>z[k]){z[k]=zt;ch[k]='o';co[k]=GR[7]}}return}
+ let det=m11*m22-m12*m21;const thr=.55*big;if(Math.abs(det)<thr)det=det>=0?thr:-thr;
+ const inv=1/det,ex=Math.hypot(m11,m12),ey=Math.hypot(m21,m22),back=azt<-.08,bl=.2*(axr*L[0]+ayt*L[1]+azt*L[2]),kz=Rs*fl.cup*azt,off=(fl.seed+t*.3+(1-Math.min(g,1))*2.5)/TP,
+ {cr,base,slope,reach,tone,cpal}=fl;
+ for(let r=Math.max(0,Math.floor(fy-ey)-1);r<Math.min(vr,Math.floor(fy+ey)+2);r++){const sy=r+.5-fy,shy=-.26*sy/ey;
+  for(let c=Math.max(0,Math.floor(fx-ex)-1);c<Math.min(cols,Math.floor(fx+ex)+2);c++){const sx=c+.5-fx,a=(m22*sx-m12*sy)*inv,b2=(m11*sy-m21*sx)*inv,s2=a*a+b2*b2;if(s2>1)continue;
+   const zc=zt+Rs*(a*uzt+b2*vzt)+kz*(1-s2),k=r*cols+c;if(zc<=z[k])continue;
+   const s=Math.sqrt(s2),u01=Math.atan2(b2,a)/TP+off;let ti=Math.floor(md(u01)*96);if(ti>=96)ti=95;const rch=reach[ti];if(s>rch)continue;
+   const sh=shy-.2*sx/ex;let b,cc,col;
+   if(back){if(s<.5){b=cl(.3+sh+dim*.5);cc='%';col=GR[b*GR.length|0]}else{b=cl(.3+sh+dim-(s>rch-.1?.2:0));cc=PS[b*6|0];col=pal[b*np|0]}}
+   else if(kind==0){const sw=md(s*2.4-u01);b=base+sh+bl+dim;if(sw<.22)b-=.3;else if(sw>.82)b+=.16;if(s<.14)b-=.22;else if(s>rch-.1)b-=.28;b=cl(b);cc=PS[b*6|0];col=pal[b*np|0]}
+   else if(s<cr){if(kind==1){const chk=(Math.floor(s*9)+Math.floor(md(u01)*23))&1;b=.3+.38*chk+.5*sh+.5*bl+.5*dim;cc=chk?'@':'o'}else{b=.55+1.5*sh+dim;cc=s<cr*.55?'@':'o'}b=cl(b);col=cpal[b*cpal.length|0]}
+   else{b=base+sh+tone[ti]+bl+dim+slope*(s-.5);if(s>rch-.1)b-=.25;b=cl(b);cc=PS[b*6|0];col=pal[b*np|0]}
+   z[k]=zc;ch[k]=cc;co[k]=col}}}
+
+// state
+let fa=.0167,qt=0,canUp=true,ang=0,spinMul=1,spinOn=true,msgI=0,msgT0=INTRO?.9:.3,last=performance.now(),t0=last;const hearts=[],petals=[];
+function particles(dt){while(hearts.length<16)hearts.push([Math.random(),Math.random()*1.25,.03+Math.random()*.05,Math.random()*6.28,HC[Math.random()*6|0]]);
+ while(petals.length<26)petals.push([Math.random(),Math.random()*1.25,.05+Math.random()*.06,Math.random()*6.28,PC[Math.random()*6|0]]);
+ for(const grp of[hearts,petals])for(const h of grp){h[1]-=h[2]*dt;if(h[1]<0){h[0]=Math.random();h[1]=1;h[4]=(grp==hearts?HC:PC)[Math.random()*6|0]}}}
+function phase(n,tt){const td=n/28,hold=2.6+.03*n;if(tt<0)return[0,0,false];if(tt<td)return[0,tt*28|0,false];if(tt<td+hold)return[0,n,false];
+ if(tt<td+hold+.9)return[(tt-td-hold)/.9*n|0,n,false];return[n,n,tt>td+hold+1.4]}
+addEventListener('keydown',e=>{const k=e.key;if(k==' '){spinOn=!spinOn;e.preventDefault()}else if(k=='+'||k=='=')spinMul=Math.min(6,spinMul*1.25);else if(k=='-'||k=='_')spinMul=Math.max(.1,spinMul/1.25);
+ else if(k=='r'||k=='R')spinMul=-spinMul;else if(k==']'||k=='['){DET=cl(DET*(k==']'?1.25:.8),.8,4);fit()}else if(k=='n'||k=='N'){msgI=(msgI+1)%MSGS.length;msgT0=(performance.now()-t0)/1e3}});
+cv.addEventListener('click',()=>spinOn=!spinOn);
+
+function tick(now){requestAnimationFrame(tick);const dt=Math.min(.1,(now-last)/1e3),t=(now-t0)/1e3;last=now;fa=fa*.9+dt*.1;
+ if(now-qt>2000&&t>3){qt=now;if(fa>.04&&QF>.75){QF=Math.max(.75,QF*.93);fit()}}
+ if(!wc[cols])wc[cols]=MSGS.map(m=>wrap(m,Math.max(12,cols-4)));const wr=wc[cols],mr=Math.min(3,Math.max(...wr.map(w=>w.length))),vr=Math.max(6,rows-mr-1),
+ scale=Math.max(1,Math.min((vr-2)/1.8,(cols-2)/3.1)),K=Math.round(cl(scale/24,.6,3)*4)/4;
+ if(!scene||K!=sceneK){scene=build(K);sceneK=K}
+ if(spinOn)ang+=SPIN*spinMul*dt;particles(dt);
+ const lines=wr[msgI].slice(0,3),nt=lines.reduce((a,l)=>a+l.length,0),[lo,hi,done]=phase(nt,t-msgT0);if(done){msgI=(msgI+1)%MSGS.length;msgT0=t}
+ const n=cols*rows;if(!BUF||BUF.n!=n)BUF={n,ch:new Array(n),co:new Uint8Array(n),z:new Float32Array(n)};const{ch,co,z}=BUF;ch.fill(' ');co.fill(0);z.fill(-1e9);G={cols,vr,z,ch,co};
+ const tilt=TILT+.035*Math.sin(t*.5),ca=Math.cos(ang),sa=Math.sin(ang),ct=Math.cos(tilt),st=Math.sin(tilt),cx=cols/2,cy=1+(TOP-PIV)*scale;cam=[ca,sa,ct,st,cx,cy,scale*2,scale];
+ const plot=(c,r,zz,s,color)=>{if(r>=0&&r<vr&&c>=0&&c<cols){const k=r*cols+c;if(zz>z[k]){z[k]=zz;ch[k]=s;co[k]=color}}},
+ proj=(x,y,z0)=>{const xr=x*ca-z0*sa,zr=x*sa+z0*ca,yt=(y-PIV)*ct-zr*st,zt=(y-PIV)*st+zr*ct,f=CD/(CD-zt);return[Math.floor(cx+xr*f*scale*2),Math.floor(cy-yt*f*scale),zt]};
+ for(const[sx,sy,ph,sp]of scene.stars){const tw=Math.sin(t*sp+ph),c=sx*cols|0,r=sy*vr|0;if(tw>.93)plot(c,r,-80,'+',252);else if(tw>.5)plot(c,r,-80,'\u00b7',247);else if(tw>0)plot(c,r,-80,'\u00b7',240)}
+ for(const[x,y,,ph,color]of hearts)plot(md(Math.floor((x+.015*Math.sin(t*1.2+ph))*cols),cols),y*vr|0,-50,HEART,color);
+ for(const[x,y,,ph,color]of petals)plot(md(Math.floor((x+.04*Math.sin(t*.9+ph))*cols),cols),y*vr|0,-50,PETCH[(t*2.2+ph*3|0)%4],color);
+ drawCore();for(const fl of scene.flowers){const g=INTRO?easeBack((t-fl.delay)/1.1):1;if(g>.02)flower(fl,g,t)}drawFlat(scene);
+ const show=INTRO?cl((t-2.5)/2,0,1):1;
+ if(show>0){scene.babies.forEach(([x,y,z0,ph],i)=>{if(i/scene.babies.length>show)return;const[c,r,zt]=proj(x,y,z0),s=Math.sin(t*2+ph)>.6;plot(c,r,zt+.02,s?'*':'\u00b7',s?231:255)});
+  for(const[x,y,z0,ph,sp]of scene.sparkles){const[c,r,zt]=proj(x,y,z0),tw=Math.sin(t*sp+ph);if(tw>.85)plot(c,r,zt,'*',231);else if(tw>.4)plot(c,r,zt,'+',225);else if(tw>0)plot(c,r,zt,'\u00b7',218)}}
+ const shift=t*8|0,put=(r,s,fn)=>{const st0=Math.max(0,(cols-s.length)>>1);for(let i=0;i<s.length;i++)if(st0+i<cols&&s[i]!=' '){ch[r*cols+st0+i]=s[i];co[r*cols+st0+i]=fn(i)}};
+ if(TO)put(0,'for '+TO,i=>MC[(i+shift)%10]);
+ let idx=0;const typing=lo==0&&hi<nt&&(t*3|0)%2==0;
+ lines.forEach((line,li)=>{const r=vr+li;if(r>=rows-1){idx+=line.length;return}const s0=Math.max(0,(cols-line.length)>>1);
+  for(let i=0;i<line.length;i++,idx++){const c=s0+i;if(c>=cols)continue;if(idx>=lo&&idx<hi&&line[i]!=' '){ch[r*cols+c]=line[i];co[r*cols+c]=MC[(idx+shift)%10]}else if(idx==hi&&typing){ch[r*cols+c]='_';co[r*cols+c]=211}}});
+ put(rows-1,SIG,()=>238+Math.round(2*(.5+.5*Math.sin(t*1.5))));
+ X.fillStyle='#0c0811';if(!PK||PK.length!=n){PK=new Int32Array(n).fill(-1);X.fillRect(0,0,Wp,Hp)}const ox=(Wp-cols*cwp)>>1,oy=(Hp-rows*chp)>>1;
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const i=r*cols+c,s=ch[i],b=s!==' '&&z[i]>-10&&s!=='\u00b7'?1:0,key=s===' '?0:s.charCodeAt(0)<<9|co[i]<<1|b;if(PK[i]===key)continue;PK[i]=key;const x=ox+c*cwp,y=oy+r*chp;X.fillRect(x,y,cwp,chp);if(key)X.drawImage(tile(s,co[i],b),x,y)}}
+requestAnimationFrame(tick);
+</script></body></html>
