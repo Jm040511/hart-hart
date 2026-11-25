@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>a bouquet, written in code</title>
+<title>bouquet</title>
 <style>:root{--bg:#0c0811;color-scheme:dark}html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}canvas{display:block;width:100vw;height:100vh;height:100dvh;touch-action:manipulation}</style>
 </head><body><canvas id="c"></canvas>
 <script>
-// keys: space pause | + / - speed | r reverse | n next message | tap = pause
-// options in the address bar: ?to=someone&from=your name&msg=one custom line&intro=0
 const Q=new URLSearchParams(location.search),TO=Q.get('to')??'A',FROM=Q.get('from')??'Red Ivan Clay',
 SIG='this is what happens when i hyperfixate/get bored lmao by '+FROM+',,,',INTRO=Q.get('intro')!=='0',
 MSGS=Q.get('msg')?[Q.get('msg')]:["If I had a single flower for every time I think about you, I could walk forever in my garden.","A flower cannot blossom without sunshine, and a man cannot live without love.","roses are #ff005f, violets are #af87ff, i built this whole bouquet in code because i was so very bored,,, argh","no water, no sunlight, just a little python",""];
